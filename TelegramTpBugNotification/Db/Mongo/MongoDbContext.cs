@@ -135,7 +135,13 @@ namespace TelegramTpBugNotification.Db.Mongo
         public async Task<Notification> GetNotificationById(Guid notificationId)
         {
             return await NotificationsCollection
-                        .Find(Builders<Notification>.Filter.Eq(nameof(Notification.IsSent), false))
+                        .Find(
+                             Builders<Notification>.Filter.And(
+                                 Builders<Notification>.Filter.Eq(
+                                     nameof(Notification.Id),
+                                     notificationId),
+                                 Builders<Notification>.Filter.Eq(
+                                     nameof(Notification.IsSent), false)))
                         .FirstOrDefaultAsync();
         }
 

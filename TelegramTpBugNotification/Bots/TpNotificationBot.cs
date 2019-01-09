@@ -111,6 +111,9 @@ namespace TelegramTpBugNotification.Bots
             {
                 // ignored, for now
             }
+
+            await _botClient.AnswerCallbackQueryAsync(
+                callbackQueryId: e.CallbackQuery.Id);
         }
 
         private async Task SendStartMessage(MessageEventArgs e)

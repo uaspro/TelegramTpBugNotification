@@ -22,12 +22,12 @@ namespace TelegramTpBugNotification.Db.Models
 
         public enum BugState
         {
-            New,
-            InProgress,
-            Implemented,
-            Reviewed,
-            Verifying,
-            Done
+            New = 0,
+            InProgress = 1,
+            Implemented = 2,
+            Reviewed = 3,
+            Verifying = 4,
+            Done = 5
         }
     }
 }

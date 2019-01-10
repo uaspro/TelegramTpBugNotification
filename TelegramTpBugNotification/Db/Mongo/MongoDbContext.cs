@@ -95,7 +95,7 @@ namespace TelegramTpBugNotification.Db.Mongo
                                                 Builders<Bug>.Filter.Eq(
                                                     nameof(Bug.TelegramUserId),
                                                     telegramUserId),
-                                                Builders<Bug>.Filter.Lte(
+                                                Builders<Bug>.Filter.Lt(
                                                     nameof(Bug.State), Bug.BugState.Done)))
                                        .Sort(Builders<Bug>.Sort.Ascending(nameof(Bug.State)))
                                        .ToListAsync();

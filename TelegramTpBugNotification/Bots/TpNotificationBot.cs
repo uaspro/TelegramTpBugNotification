@@ -67,6 +67,10 @@ namespace TelegramTpBugNotification.Bots
                         await SendBugsMessage(e.Message.Chat, userOpenBugs);
 
                         break;
+                    case @"/unsubscribe":
+                        await _mongoDbContext.UnsubscribeUser(e.Message.From.Id);
+
+                        break;
                     default:
                         await RegisterUser(e);
 

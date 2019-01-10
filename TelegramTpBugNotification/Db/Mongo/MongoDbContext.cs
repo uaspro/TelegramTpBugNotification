@@ -14,9 +14,9 @@ namespace TelegramTpBugNotification.Db.Mongo
 
         private const string MongoDbName = nameof(TelegramTpBugNotification);
 
-        private const string UsersCollectionName = MongoDbName + "_users";
-        private const string BugsCollectionName = MongoDbName + "_bugs";
-        private const string NotificationsCollectionName = MongoDbName + "_notifications";
+        private const string UsersCollectionName = "users";
+        private const string BugsCollectionName = "bugs";
+        private const string NotificationsCollectionName =  "notifications";
 
         private readonly MongoClient _mongoClient;
 
@@ -57,6 +57,11 @@ namespace TelegramTpBugNotification.Db.Mongo
             return await UsersCollection.Find(Builders<User>.Filter.Empty).ToListAsync();
         }
 
+        public async Task UnsubscribeUser(int telegramUserId)
+        {
+            await UsersCollection.DeleteOneAsync(Builders<User>.Filter.Eq(nameof(User.TelegramUserId), telegramUserId));
+        }
+
         public async Task InsertOrUpdateBugs(IList<Bug> bugs)
         {
             foreach (var bug in bugs)
@@ -82,10 +87,18 @@ namespace TelegramTpBugNotification.Db.Mongo
 
         public async Task UpdateExistingBugsExeptNew(IList<Bug> newBugs)
         {
+            if (!newBugs.Any())
+            {
+                return;
+            }
+
+            var anyBug = newBugs.First();
             await BugsCollection.UpdateManyAsync(
-                Builders<Bug>.Filter.Nin(nameof(Bug.Id), newBugs.Select(b => b.Id)),
+                Builders<Bug>.Filter.And(
+                    Builders<Bug>.Filter.Eq(nameof(Bug.TelegramUserId), anyBug.TelegramUserId),
+                    Builders<Bug>.Filter.Nin(nameof(Bug.Id), newBugs.Select(b => b.Id))),
                 Builders<Bug>.Update.Set(nameof(Bug.State), Bug.BugState.Done)
-                                    .Set(nameof(Bug.IsNotified), true));
+                             .Set(nameof(Bug.IsNotified), true));
         }
 
         public async Task<IList<Bug>> GetUserOpenBugs(int telegramUserId)
@@ -138,27 +151,8 @@ namespace TelegramTpBugNotification.Db.Mongo
         public async Task<Notification> GetNotificationById(Guid notificationId)
         {
             return await NotificationsCollection
-                        .Find(
-                             Builders<Notification>.Filter.And(
-                                 Builders<Notification>.Filter.Eq(
-                                     nameof(Notification.Id),
-                                     notificationId),
-                                 Builders<Notification>.Filter.Eq(
-                                     nameof(Notification.IsSent), false)))
+                        .Find(Builders<Notification>.Filter.Eq(nameof(Notification.Id), notificationId))
                         .FirstOrDefaultAsync();
-        }
-
-        public async Task GetNotSentNotifications()
-        {
-            await NotificationsCollection.Find(Builders<Notification>.Filter.Eq(nameof(Notification.IsSent), false))
-                                         .ToListAsync();
-        }
-
-        public async Task UpdateNotificationIsSent(Notification notification, bool isSent)
-        {
-            await NotificationsCollection.UpdateOneAsync(
-                Builders<Notification>.Filter.Eq(nameof(Notification.Id), notification.Id),
-                Builders<Notification>.Update.Set(nameof(Notification.IsSent), isSent));
         }
     }
 }

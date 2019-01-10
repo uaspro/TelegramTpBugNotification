@@ -14,7 +14,5 @@ namespace TelegramTpBugNotification.Db.Models
         public int TelegramUserId { get; set; }
 
         public int[] BugIds { get; set; }
-
-        public bool IsSent { get; set; }
     }
 }

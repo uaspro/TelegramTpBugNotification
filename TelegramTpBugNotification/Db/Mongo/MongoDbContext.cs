@@ -43,6 +43,9 @@ namespace TelegramTpBugNotification.Db.Mongo
             }
             else
             {
+                await BugsCollection.DeleteManyAsync(
+                    Builders<Bug>.Filter.Eq(nameof(Bug.TelegramUserId), dbUser.TelegramUserId));
+
                 await UsersCollection.UpdateOneAsync(
                     Builders<User>.Filter.Eq(nameof(User.TelegramUserId), user.TelegramUserId),
                     Builders<User>.Update.Set(nameof(User.TpUserLogin), user.TpUserLogin));
